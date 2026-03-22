@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lean Recomp Meal Builder</title>
+<style>
+body { font-family: Arial, sans-serif; background:#f4f7fb; color:#1f2937; margin:0; }
+.wrap { max-width:1200px; margin:0 auto; padding:24px; }
+.hero { background:#1e293b; color:white; padding:24px; border-radius:18px; margin-bottom:18px; }
+.grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+@media (max-width:900px) { .grid { grid-template-columns:1fr; } }
+.card { background:white; border:1px solid #e5e7eb; border-radius:16px; padding:18px; }
+.chooser-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+@media (max-width:700px) { .chooser-grid { grid-template-columns:1fr; } }
+label { display:block; margin-bottom:6px; font-weight:bold; }
+select, button { width:100%; padding:12px; border-radius:10px; border:1px solid #cbd5e1; font-size:15px; }
+button { cursor:pointer; background:#2563eb; color:white; border:none; font-weight:bold; }
+button.secondary { background:#e5e7eb; color:#111827; }
+.top-actions { display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
+.top-actions button, .top-actions select { width:auto; min-width:160px; }
+.actions { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:14px; }
+@media (max-width:900px) { .actions { grid-template-columns:1fr; } }
+.kpis { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:10px; margin-top:12px; }
+@media (max-width:700px) { .kpis { grid-template-columns:1fr 1fr; } }
+.kpi { background:#f8fafc; border:1px solid #e5e7eb; border-radius:12px; padding:10px; }
+.chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.chip { background:#eff6ff; border:1px solid #bfdbfe; border-radius:999px; padding:7px 10px; font-size:13px; }
+table { width:100%; border-collapse:collapse; margin-top:12px; }
+th, td { border:1px solid #e5e7eb; padding:8px; text-align:left; font-size:14px; }
+th { background:#f8fafc; }
+.status { margin-top:12px; padding:10px; border-radius:10px; background:#ecfdf5; border:1px solid #a7f3d0; color:#065f46; }
+.barwrap { background:#e5e7eb; height:10px; border-radius:999px; overflow:hidden; margin-top:6px; }
+.bar { background:#2563eb; height:10px; width:0%; }
+.section-title { font-size:22px; margin:0 0 10px; }
+.small { color:#6b7280; font-size:13px; }
+.library { margin-top:18px; }
+details { background:white; border:1px solid #e5e7eb; border-radius:12px; padding:12px; margin-bottom:12px; }
+summary { cursor:pointer; font-weight:bold; }
+.note { margin-top:10px; color:#cbd5e1; font-size:14px; }
+</style>
+</head>
+<body onload="initPage()">
+<div class="wrap">
+  <div class="hero">
+    <h1 id="title" style="margin:0 0 8px;">💪 Lean Recomp Meal Builder</h1>
+    <div id="subtitle">🔥 Updated for a leaner plan around 17% body fat with slightly lower calories and carbs.</div>
+    <div class="note"><span id="defaultTargetsText">🎯 Default daily targets</span>: <span id="targetsLine"></span></div>
+    <div class="top-actions">
+      <select id="languageSelect" onchange="changeLanguage(this.value)">
+        <option value="en">🇺🇸 English</option>
+        <option value="he">🇮🇱 עברית</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="section-title" id="builderTitle">🧩 Meal Builder</div>
+      <div class="chooser-grid">
+        <div>
+          <label id="mealTypeLabel" for="mealType">🍽️ Meal Type</label>
+          <select id="mealType" onchange="previewMeal()">
+            <option value="Breakfast">Breakfast</option>
+            <option value="Lunch">Lunch</option>
+            <option value="Dinner">Dinner</option>
+            <option value="Snack">Snack</option>
+          </select>
+        </div>
+        <div>
+          <label id="proteinLabel" for="proteinSelect">🍗 Protein</label>
+          <select id="proteinSelect" onchange="previewMeal()"><option value="0">None | 0</option>
+<option value="1">Chicken Breast | 150 g</option>
+<option value="2">Chicken Thigh | 150 g</option>
+<option value="3">Chicken Liver | 150 g</option>
+<option value="4">Tuna in Water | 120 g drained</option>
+<option value="5">Cottage Cheese 5% | 200 g</option>
+<option value="6">Greek Yogurt 0% | 250 g</option>
+<option value="7">White Fish | 180 g</option>
+<option value="8">Lean Beef Steak | 150 g</option>
+<option value="9">Lean Ground Beef | 150 g</option>
+<option value="10">Tofu | 200 g</option>
+<option value="11">Eggs | 3 large eggs</option>
+<option value="12">Protein Powder | 30 g</option></select>
+        </div>
+        <div>
+          <label id="carbLabel" for="carbSelect">🍚 Carb</label>
+          <select id="carbSelect" onchange="previewMeal()"><option value="0">None | 0</option>
+<option value="1">Cooked Rice | 200 g</option>
+<option value="2">Dry Pasta | 100 g</option>
+<option value="3">Potato | 300 g</option>
+<option value="4">Cooked Bulgur | 200 g</option>
+<option value="5">Cooked Couscous | 200 g</option>
+<option value="6">Cooked Ptitim | 200 g</option>
+<option value="7">Cooked Quinoa | 200 g</option>
+<option value="8">Spelt Pita | 80 g</option>
+<option value="9">Whole Wheat Bread | 120 g</option>
+<option value="10">Oats | 80 g</option>
+<option value="11">Dry Noodles | 100 g</option>
+<option value="12">Dry Egg Noodles | 100 g</option>
+<option value="13">Dry Bean Noodles | 80 g</option></select>
+        </div>
+        <div>
+          <label id="fatLabel" for="fatSelect">🥑 Fat</label>
+          <select id="fatSelect" onchange="previewMeal()"><option value="0">None | 0</option>
+<option value="1">Tahini | 15 g</option>
+<option value="2">Avocado | 70 g</option>
+<option value="3">Olive Oil | 14 g</option>
+<option value="4">Yellow Cheese | 50 g</option>
+<option value="5">Eggs | 2 large eggs</option></select>
+        </div>
+        <div>
+          <label id="vegLabel" for="vegSelect">🥗 Vegetables</label>
+          <select id="vegSelect" onchange="previewMeal()"><option value="0">None | 0</option>
+<option value="1">Morning Vegetables | 250 g</option>
+<option value="2">Lunch Vegetables | 250 g</option>
+<option value="3">Evening Vegetables | 150 g</option></select>
+        </div>
+        <div>
+          <label id="sweetLabel" for="sweetSelect">🍫 Sweet / Extra</label>
+          <select id="sweetSelect" onchange="previewMeal()"><option value="0">None | 0</option>
+<option value="1">Protein Pudding | 1 unit</option>
+<option value="2">Protein Bar | 1 unit</option>
+<option value="3">Banana | 136 g</option>
+<option value="4">Apple | 182 g</option>
+<option value="5">Honey | 21 g</option>
+<option value="6">Dark Chocolate | 20 g</option></select>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="button" onclick="addMeal()" id="addMealBtn">➕ Add Meal To Day</button>
+        <button type="button" class="secondary" onclick="resetBuilder()" id="resetBuilderBtn">🧹 Reset Meal Builder</button>
+        <button type="button" class="secondary" onclick="resetDay()" id="resetDayBtn">♻️ Reset Day</button>
+      </div>
+
+      <div id="statusBox" class="status">✅ Ready.</div>
+
+      <div style="margin-top:14px;"><strong id="previewTitle">👀 Current Meal Preview</strong></div>
+      <div id="currentMealChips" class="chips"></div>
+      <div class="kpis">
+        <div class="kpi"><div class="small" id="caloriesSmall1">Calories</div><div id="previewCalories">0</div></div>
+        <div class="kpi"><div class="small" id="proteinSmall1">Protein</div><div id="previewProtein">0g</div></div>
+        <div class="kpi"><div class="small" id="carbsSmall1">Carbs</div><div id="previewCarbs">0g</div></div>
+        <div class="kpi"><div class="small" id="fatSmall1">Fat</div><div id="previewFat">0g</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title" id="dailySummaryTitle">📊 Daily Summary</div>
+      <div class="kpis">
+        <div class="kpi"><div class="small" id="caloriesSmall2">Calories</div><div><span id="dayCalories">0</span> / 2350</div><div class="barwrap"><div id="barCalories" class="bar"></div></div></div>
+        <div class="kpi"><div class="small" id="proteinSmall2">Protein</div><div><span id="dayProtein">0g</span> / 155g</div><div class="barwrap"><div id="barProtein" class="bar"></div></div></div>
+        <div class="kpi"><div class="small" id="carbsSmall2">Carbs</div><div><span id="dayCarbs">0g</span> / 280g</div><div class="barwrap"><div id="barCarbs" class="bar"></div></div></div>
+        <div class="kpi"><div class="small" id="fatSmall2">Fat</div><div><span id="dayFat">0g</span> / 65g</div><div class="barwrap"><div id="barFat" class="bar"></div></div></div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th id="mealTh">Meal</th>
+            <th id="itemsTh">Items</th>
+            <th id="caloriesTh">Calories</th>
+            <th id="proteinTh">Protein</th>
+            <th id="carbsTh">Carbs</th>
+            <th id="fatTh">Fat</th>
+            <th id="actionTh">Action</th>
+          </tr>
+        </thead>
+        <tbody id="dayMealsBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="library">
+    <details open>
+      <summary id="proteinLibraryTitle">🍗 Protein Library</summary>
+      <table><thead><tr><th id="foodTh1">Food</th><th id="portionTh1">Portion</th><th>Calories</th><th>Protein</th><th>Carbs</th><th>Fat</th></tr></thead><tbody><tr><td data-en='None' data-he='ללא חלבון'>None</td><td>0</td><td>0</td><td>0.0g</td><td>0.0g</td><td>0.0g</td></tr>
+<tr><td data-en='Chicken Breast' data-he='חזה עוף'>Chicken Breast</td><td>150 g</td><td>248</td><td>46.0g</td><td>0.0g</td><td>5.4g</td></tr>
+<tr><td data-en='Chicken Thigh' data-he='פרגית עוף'>Chicken Thigh</td><td>150 g</td><td>313</td><td>38.9g</td><td>0.0g</td><td>16.4g</td></tr>
+<tr><td data-en='Chicken Liver' data-he='כבד עוף'>Chicken Liver</td><td>150 g</td><td>251</td><td>37.9g</td><td>1.5g</td><td>8.9g</td></tr>
+<tr><td data-en='Tuna in Water' data-he='טונה במים'>Tuna in Water</td><td>120 g drained</td><td>139</td><td>31.1g</td><td>0.0g</td><td>1.0g</td></tr>
+<tr><td data-en='Cottage Cheese 5%' data-he='קוטג&#x27; 5%'>Cottage Cheese 5%</td><td>200 g</td><td>196</td><td>22.0g</td><td>6.8g</td><td>10.0g</td></tr>
+<tr><td data-en='Greek Yogurt 0%' data-he='יוגורט יווני 0%'>Greek Yogurt 0%</td><td>250 g</td><td>148</td><td>25.8g</td><td>9.0g</td><td>1.0g</td></tr>
+<tr><td data-en='White Fish' data-he='דג לבן'>White Fish</td><td>180 g</td><td>189</td><td>41.6g</td><td>0.0g</td><td>1.4g</td></tr>
+<tr><td data-en='Lean Beef Steak' data-he='סטייק רזה מבקר'>Lean Beef Steak</td><td>150 g</td><td>291</td><td>39.9g</td><td>0.0g</td><td>14.6g</td></tr>
+<tr><td data-en='Lean Ground Beef' data-he='בשר אדום טחון רזה'>Lean Ground Beef</td><td>150 g</td><td>259</td><td>39.3g</td><td>0.0g</td><td>10.6g</td></tr>
+<tr><td data-en='Tofu' data-he='טופו'>Tofu</td><td>200 g</td><td>288</td><td>34.8g</td><td>6.2g</td><td>17.3g</td></tr>
+<tr><td data-en='Eggs' data-he='ביצים'>Eggs</td><td>3 large eggs</td><td>216</td><td>18.9g</td><td>1.1g</td><td>14.4g</td></tr>
+<tr><td data-en='Protein Powder' data-he='אבקת חלבון'>Protein Powder</td><td>30 g</td><td>120</td><td>24.0g</td><td>3.0g</td><td>1.5g</td></tr></tbody></table>
+    </details>
+    <details>
+      <summary id="carbLibraryTitle">🍚 Carb Library</summary>
+      <table><thead><tr><th id="foodTh2">Food</th><th id="portionTh2">Portion</th><th>Calories</th><th>Protein</th><th>Carbs</th><th>Fat</th></tr></thead><tbody><tr><td data-en='None' data-he='ללא פחמימה'>None</td><td>0</td><td>0</td><td>0.0g</td><td>0.0g</td><td>0.0g</td></tr>
+<tr><td data-en='Cooked Rice' data-he='אורז מבושל'>Cooked Rice</td><td>200 g</td><td>246</td><td>5.1g</td><td>53.6g</td><td>0.6g</td></tr>
+<tr><td data-en='Dry Pasta' data-he='פסטה יבשה'>Dry Pasta</td><td>100 g</td><td>371</td><td>13.0g</td><td>75.0g</td><td>1.5g</td></tr>
+<tr><td data-en='Potato' data-he='תפוח אדמה'>Potato</td><td>300 g</td><td>261</td><td>5.6g</td><td>60.0g</td><td>0.3g</td></tr>
+<tr><td data-en='Cooked Bulgur' data-he='בורגול מבושל'>Cooked Bulgur</td><td>200 g</td><td>166</td><td>6.2g</td><td>37.8g</td><td>0.4g</td></tr>
+<tr><td data-en='Cooked Couscous' data-he='קוסקוס מבושל'>Cooked Couscous</td><td>200 g</td><td>224</td><td>7.6g</td><td>46.4g</td><td>0.4g</td></tr>
+<tr><td data-en='Cooked Ptitim' data-he='פתיתים מבושלים'>Cooked Ptitim</td><td>200 g</td><td>298</td><td>9.8g</td><td>61.8g</td><td>1.0g</td></tr>
+<tr><td data-en='Cooked Quinoa' data-he='קינואה מבושלת'>Cooked Quinoa</td><td>200 g</td><td>240</td><td>8.8g</td><td>42.6g</td><td>3.8g</td></tr>
+<tr><td data-en='Spelt Pita' data-he='פיתה כוסמין'>Spelt Pita</td><td>80 g</td><td>220</td><td>7.4g</td><td>43.0g</td><td>1.6g</td></tr>
+<tr><td data-en='Whole Wheat Bread' data-he='לחם מלא'>Whole Wheat Bread</td><td>120 g</td><td>298</td><td>15.8g</td><td>49.3g</td><td>4.3g</td></tr>
+<tr><td data-en='Oats' data-he='שיבולת שועל'>Oats</td><td>80 g</td><td>311</td><td>13.5g</td><td>53.0g</td><td>5.5g</td></tr>
+<tr><td data-en='Dry Noodles' data-he='נודלס יבשים'>Dry Noodles</td><td>100 g</td><td>357</td><td>11.0g</td><td>72.0g</td><td>1.7g</td></tr>
+<tr><td data-en='Dry Egg Noodles' data-he='אטריות ביצים יבשות'>Dry Egg Noodles</td><td>100 g</td><td>384</td><td>14.2g</td><td>71.3g</td><td>4.4g</td></tr>
+<tr><td data-en='Dry Bean Noodles' data-he='אטריות שעועית יבשות'>Dry Bean Noodles</td><td>80 g</td><td>281</td><td>0.1g</td><td>70.2g</td><td>0.0g</td></tr></tbody></table>
+    </details>
+    <details>
+      <summary id="fatLibraryTitle">🥑 Fat Library</summary>
+      <table><thead><tr><th id="foodTh3">Food</th><th id="portionTh3">Portion</th><th>Calories</th><th>Protein</th><th>Carbs</th><th>Fat</th></tr></thead><tbody><tr><td data-en='None' data-he='ללא שומן'>None</td><td>0</td><td>0</td><td>0.0g</td><td>0.0g</td><td>0.0g</td></tr>
+<tr><td data-en='Tahini' data-he='טחינה'>Tahini</td><td>15 g</td><td>89</td><td>2.6g</td><td>3.2g</td><td>8.0g</td></tr>
+<tr><td data-en='Avocado' data-he='אבוקדו'>Avocado</td><td>70 g</td><td>112</td><td>1.4g</td><td>6.0g</td><td>10.3g</td></tr>
+<tr><td data-en='Olive Oil' data-he='שמן זית'>Olive Oil</td><td>14 g</td><td>119</td><td>0.0g</td><td>0.0g</td><td>13.5g</td></tr>
+<tr><td data-en='Yellow Cheese' data-he='גבינה צהובה'>Yellow Cheese</td><td>50 g</td><td>178</td><td>12.4g</td><td>1.7g</td><td>14.8g</td></tr>
+<tr><td data-en='Eggs' data-he='ביצים'>Eggs</td><td>2 large eggs</td><td>144</td><td>12.6g</td><td>0.7g</td><td>9.6g</td></tr></tbody></table>
+    </details>
+    <details>
+      <summary id="vegLibraryTitle">🥗 Vegetable Library</summary>
+      <table><thead><tr><th id="foodTh4">Food</th><th id="portionTh4">Portion</th><th>Calories</th><th>Protein</th><th>Carbs</th><th>Fat</th></tr></thead><tbody><tr><td data-en='None' data-he='ללא ירקות'>None</td><td>0</td><td>0</td><td>0.0g</td><td>0.0g</td><td>0.0g</td></tr>
+<tr><td data-en='Morning Vegetables' data-he='ירקות בוקר'>Morning Vegetables</td><td>250 g</td><td>78</td><td>3.2g</td><td>17.6g</td><td>0.4g</td></tr>
+<tr><td data-en='Lunch Vegetables' data-he='ירקות צהריים'>Lunch Vegetables</td><td>250 g</td><td>85</td><td>2.6g</td><td>18.0g</td><td>1.2g</td></tr>
+<tr><td data-en='Evening Vegetables' data-he='ירקות ערב'>Evening Vegetables</td><td>150 g</td><td>36</td><td>2.0g</td><td>6.7g</td><td>0.4g</td></tr></tbody></table>
+    </details>
+    <details>
+      <summary id="sweetLibraryTitle">🍫 Sweet / Extra Library</summary>
+      <table><thead><tr><th id="foodTh5">Food</th><th id="portionTh5">Portion</th><th>Calories</th><th>Protein</th><th>Carbs</th><th>Fat</th></tr></thead><tbody><tr><td data-en='None' data-he='ללא תוספת'>None</td><td>0</td><td>0</td><td>0.0g</td><td>0.0g</td><td>0.0g</td></tr>
+<tr><td data-en='Protein Pudding' data-he='מעדן חלבון'>Protein Pudding</td><td>1 unit</td><td>150</td><td>20.0g</td><td>10.0g</td><td>3.0g</td></tr>
+<tr><td data-en='Protein Bar' data-he='חטיף חלבון'>Protein Bar</td><td>1 unit</td><td>190</td><td>18.0g</td><td>18.0g</td><td>7.0g</td></tr>
+<tr><td data-en='Banana' data-he='בננה'>Banana</td><td>136 g</td><td>121</td><td>1.5g</td><td>31.1g</td><td>0.4g</td></tr>
+<tr><td data-en='Apple' data-he='תפוח'>Apple</td><td>182 g</td><td>95</td><td>0.5g</td><td>25.1g</td><td>0.3g</td></tr>
+<tr><td data-en='Honey' data-he='דבש'>Honey</td><td>21 g</td><td>64</td><td>0.0g</td><td>17.3g</td><td>0.0g</td></tr>
+<tr><td data-en='Dark Chocolate' data-he='שוקולד מריר'>Dark Chocolate</td><td>20 g</td><td>120</td><td>1.6g</td><td>9.2g</td><td>8.5g</td></tr></tbody></table>
+    </details>
+  </div>
+</div>
+
+<script>
+var FOODS = {"protein": [{"name_en": "None", "name_he": "ללא חלבון", "amount": "0", "kcal": 0, "p": 0.0, "c": 0.0, "f": 0.0}, {"name_en": "Chicken Breast", "name_he": "חזה עוף", "amount": "150 g", "kcal": 248, "p": 46.0, "c": 0.0, "f": 5.4}, {"name_en": "Chicken Thigh", "name_he": "פרגית עוף", "amount": "150 g", "kcal": 313, "p": 38.9, "c": 0.0, "f": 16.4}, {"name_en": "Chicken Liver", "name_he": "כבד עוף", "amount": "150 g", "kcal": 251, "p": 37.9, "c": 1.5, "f": 8.9}, {"name_en": "Tuna in Water", "name_he": "טונה במים", "amount": "120 g drained", "kcal": 139, "p": 31.1, "c": 0.0, "f": 1.0}, {"name_en": "Cottage Cheese 5%", "name_he": "קוטג' 5%", "amount": "200 g", "kcal": 196, "p": 22.0, "c": 6.8, "f": 10.0}, {"name_en": "Greek Yogurt 0%", "name_he": "יוגורט יווני 0%", "amount": "250 g", "kcal": 148, "p": 25.8, "c": 9.0, "f": 1.0}, {"name_en": "White Fish", "name_he": "דג לבן", "amount": "180 g", "kcal": 189, "p": 41.6, "c": 0.0, "f": 1.4}, {"name_en": "Lean Beef Steak", "name_he": "סטייק רזה מבקר", "amount": "150 g", "kcal": 291, "p": 39.9, "c": 0.0, "f": 14.6}, {"name_en": "Lean Ground Beef", "name_he": "בשר אדום טחון רזה", "amount": "150 g", "kcal": 259, "p": 39.3, "c": 0.0, "f": 10.6}, {"name_en": "Tofu", "name_he": "טופו", "amount": "200 g", "kcal": 288, "p": 34.8, "c": 6.2, "f": 17.3}, {"name_en": "Eggs", "name_he": "ביצים", "amount": "3 large eggs", "kcal": 216, "p": 18.9, "c": 1.1, "f": 14.4}, {"name_en": "Protein Powder", "name_he": "אבקת חלבון", "amount": "30 g", "kcal": 120, "p": 24.0, "c": 3.0, "f": 1.5}], "carbs": [{"name_en": "None", "name_he": "ללא פחמימה", "amount": "0", "kcal": 0, "p": 0.0, "c": 0.0, "f": 0.0}, {"name_en": "Cooked Rice", "name_he": "אורז מבושל", "amount": "200 g", "kcal": 246, "p": 5.1, "c": 53.6, "f": 0.6}, {"name_en": "Dry Pasta", "name_he": "פסטה יבשה", "amount": "100 g", "kcal": 371, "p": 13.0, "c": 75.0, "f": 1.5}, {"name_en": "Potato", "name_he": "תפוח אדמה", "amount": "300 g", "kcal": 261, "p": 5.6, "c": 60.0, "f": 0.3}, {"name_en": "Cooked Bulgur", "name_he": "בורגול מבושל", "amount": "200 g", "kcal": 166, "p": 6.2, "c": 37.8, "f": 0.4}, {"name_en": "Cooked Couscous", "name_he": "קוסקוס מבושל", "amount": "200 g", "kcal": 224, "p": 7.6, "c": 46.4, "f": 0.4}, {"name_en": "Cooked Ptitim", "name_he": "פתיתים מבושלים", "amount": "200 g", "kcal": 298, "p": 9.8, "c": 61.8, "f": 1.0}, {"name_en": "Cooked Quinoa", "name_he": "קינואה מבושלת", "amount": "200 g", "kcal": 240, "p": 8.8, "c": 42.6, "f": 3.8}, {"name_en": "Spelt Pita", "name_he": "פיתה כוסמין", "amount": "80 g", "kcal": 220, "p": 7.4, "c": 43.0, "f": 1.6}, {"name_en": "Whole Wheat Bread", "name_he": "לחם מלא", "amount": "120 g", "kcal": 298, "p": 15.8, "c": 49.3, "f": 4.3}, {"name_en": "Oats", "name_he": "שיבולת שועל", "amount": "80 g", "kcal": 311, "p": 13.5, "c": 53.0, "f": 5.5}, {"name_en": "Dry Noodles", "name_he": "נודלס יבשים", "amount": "100 g", "kcal": 357, "p": 11.0, "c": 72.0, "f": 1.7}, {"name_en": "Dry Egg Noodles", "name_he": "אטריות ביצים יבשות", "amount": "100 g", "kcal": 384, "p": 14.2, "c": 71.3, "f": 4.4}, {"name_en": "Dry Bean Noodles", "name_he": "אטריות שעועית יבשות", "amount": "80 g", "kcal": 281, "p": 0.1, "c": 70.2, "f": 0.0}], "fats": [{"name_en": "None", "name_he": "ללא שומן", "amount": "0", "kcal": 0, "p": 0.0, "c": 0.0, "f": 0.0}, {"name_en": "Tahini", "name_he": "טחינה", "amount": "15 g", "kcal": 89, "p": 2.6, "c": 3.2, "f": 8.0}, {"name_en": "Avocado", "name_he": "אבוקדו", "amount": "70 g", "kcal": 112, "p": 1.4, "c": 6.0, "f": 10.3}, {"name_en": "Olive Oil", "name_he": "שמן זית", "amount": "14 g", "kcal": 119, "p": 0.0, "c": 0.0, "f": 13.5}, {"name_en": "Yellow Cheese", "name_he": "גבינה צהובה", "amount": "50 g", "kcal": 178, "p": 12.4, "c": 1.7, "f": 14.8}, {"name_en": "Eggs", "name_he": "ביצים", "amount": "2 large eggs", "kcal": 144, "p": 12.6, "c": 0.7, "f": 9.6}], "veg": [{"name_en": "None", "name_he": "ללא ירקות", "amount": "0", "kcal": 0, "p": 0.0, "c": 0.0, "f": 0.0}, {"name_en": "Morning Vegetables", "name_he": "ירקות בוקר", "amount": "250 g", "kcal": 78, "p": 3.2, "c": 17.6, "f": 0.4}, {"name_en": "Lunch Vegetables", "name_he": "ירקות צהריים", "amount": "250 g", "kcal": 85, "p": 2.6, "c": 18.0, "f": 1.2}, {"name_en": "Evening Vegetables", "name_he": "ירקות ערב", "amount": "150 g", "kcal": 36, "p": 2.0, "c": 6.7, "f": 0.4}], "sweets": [{"name_en": "None", "name_he": "ללא תוספת", "amount": "0", "kcal": 0, "p": 0.0, "c": 0.0, "f": 0.0}, {"name_en": "Protein Pudding", "name_he": "מעדן חלבון", "amount": "1 unit", "kcal": 150, "p": 20.0, "c": 10.0, "f": 3.0}, {"name_en": "Protein Bar", "name_he": "חטיף חלבון", "amount": "1 unit", "kcal": 190, "p": 18.0, "c": 18.0, "f": 7.0}, {"name_en": "Banana", "name_he": "בננה", "amount": "136 g", "kcal": 121, "p": 1.5, "c": 31.1, "f": 0.4}, {"name_en": "Apple", "name_he": "תפוח", "amount": "182 g", "kcal": 95, "p": 0.5, "c": 25.1, "f": 0.3}, {"name_en": "Honey", "name_he": "דבש", "amount": "21 g", "kcal": 64, "p": 0.0, "c": 17.3, "f": 0.0}, {"name_en": "Dark Chocolate", "name_he": "שוקולד מריר", "amount": "20 g", "kcal": 120, "p": 1.6, "c": 9.2, "f": 8.5}]};
+var TARGETS = {"kcal": 2350, "protein": 155, "carbs": 280, "fat": 65};
+var DAY_MEALS = [];
+var LANG = "en";
+
+var TEXT = {
+  en: {
+    title: "💪 Lean Recomp Meal Builder",
+    subtitle: "🔥 Updated for a leaner plan around 17% body fat with slightly lower calories and carbs.",
+    defaultTargets: "🎯 Default daily targets",
+    builderTitle: "🧩 Meal Builder",
+    mealType: "🍽️ Meal Type",
+    protein: "🍗 Protein",
+    carb: "🍚 Carb",
+    fat: "🥑 Fat",
+    veg: "🥗 Vegetables",
+    sweet: "🍫 Sweet / Extra",
+    addMeal: "➕ Add Meal To Day",
+    resetBuilder: "🧹 Reset Meal Builder",
+    resetDay: "♻️ Reset Day",
+    ready: "✅ Ready.",
+    previewTitle: "👀 Current Meal Preview",
+    dailySummary: "📊 Daily Summary",
+    calories: "Calories",
+    proteinWord: "Protein",
+    carbs: "Carbs",
+    fatWord: "Fat",
+    meal: "Meal",
+    items: "Items",
+    action: "Action",
+    food: "Food",
+    portion: "Portion",
+    proteinLibrary: "🍗 Protein Library",
+    carbLibrary: "🍚 Carb Library",
+    fatLibrary: "🥑 Fat Library",
+    vegLibrary: "🥗 Vegetable Library",
+    sweetLibrary: "🍫 Sweet / Extra Library",
+    breakfast: "Breakfast",
+    lunch: "Lunch",
+    dinner: "Dinner",
+    snack: "Snack",
+    noItems: "No calculated items selected yet",
+    partialMeal: "Partial meal",
+    added: "✅ Meal added successfully.",
+    deleted: "🗑️ Meal deleted.",
+    dayReset: "♻️ Day reset.",
+    builderReset: "🧹 Meal builder reset.",
+    deleteBtn: "Delete"
+  },
+  he: {
+    title: "💪 בונה ארוחות לחיטוב ועלייה נקייה",
+    subtitle: "🔥 גרסה מעודכנת לאזור 17% שומן עם פחות קלוריות ופחות פחמימות.",
+    defaultTargets: "🎯 יעדים יומיים",
+    builderTitle: "🧩 בונה הארוחות",
+    mealType: "🍽️ סוג ארוחה",
+    protein: "🍗 חלבון",
+    carb: "🍚 פחמימה",
+    fat: "🥑 שומן",
+    veg: "🥗 ירקות",
+    sweet: "🍫 מתוק / תוספת",
+    addMeal: "➕ הוסף ארוחה ליום",
+    resetBuilder: "🧹 נקה את בונה הארוחות",
+    resetDay: "♻️ אפס את היום",
+    ready: "✅ מוכן.",
+    previewTitle: "👀 תצוגת הארוחה הנוכחית",
+    dailySummary: "📊 סיכום יומי",
+    calories: "קלוריות",
+    proteinWord: "חלבון",
+    carbs: "פחמימות",
+    fatWord: "שומן",
+    meal: "ארוחה",
+    items: "פריטים",
+    action: "פעולה",
+    food: "מזון",
+    portion: "מנה",
+    proteinLibrary: "🍗 ספריית חלבונים",
+    carbLibrary: "🍚 ספריית פחמימות",
+    fatLibrary: "🥑 ספריית שומנים",
+    vegLibrary: "🥗 ספריית ירקות",
+    sweetLibrary: "🍫 ספריית מתוקים / תוספות",
+    breakfast: "בוקר",
+    lunch: "צהריים",
+    dinner: "ערב",
+    snack: "ביניים",
+    noItems: "עדיין לא נבחרו רכיבים מחושבים",
+    partialMeal: "ארוחה חלקית",
+    added: "✅ הארוחה נוספה בהצלחה.",
+    deleted: "🗑️ הארוחה נמחקה.",
+    dayReset: "♻️ היום אופס.",
+    builderReset: "🧹 בונה הארוחות נוקה.",
+    deleteBtn: "מחק"
+  }
+};
+
+function $(id) { return document.getElementById(id); }
+
+function setStatus(msg, isError) {
+  var box = $("statusBox");
+  box.innerHTML = msg;
+  box.style.background = isError ? "#fef2f2" : "#ecfdf5";
+  box.style.borderColor = isError ? "#fecaca" : "#a7f3d0";
+  box.style.color = isError ? "#991b1b" : "#065f46";
+}
+
+function getName(item) {
+  return LANG === "he" ? item.name_he : item.name_en;
+}
+
+function buildOptions(selectId, group) {
+  var sel = $(selectId);
+  sel.innerHTML = "";
+  for (var i = 0; i < FOODS[group].length; i++) {
+    var item = FOODS[group][i];
+    var option = document.createElement("option");
+    option.value = i;
+    option.text = getName(item) + " | " + item.amount;
+    sel.appendChild(option);
+  }
+}
+
+function getSelected(group, selectId) {
+  var idx = Number($(selectId).value);
+  if (isNaN(idx) || idx < 0 || idx >= FOODS[group].length) idx = 0;
+  return FOODS[group][idx];
+}
+
+function translateMealType(type) {
+  if (LANG === "en") return type;
+  if (type === "Breakfast") return TEXT.he.breakfast;
+  if (type === "Lunch") return TEXT.he.lunch;
+  if (type === "Dinner") return TEXT.he.dinner;
+  if (type === "Snack") return TEXT.he.snack;
+  return type;
+}
+
+function getCurrentMeal() {
+  var items = [
+    getSelected("protein", "proteinSelect"),
+    getSelected("carbs", "carbSelect"),
+    getSelected("fats", "fatSelect"),
+    getSelected("veg", "vegSelect"),
+    getSelected("sweets", "sweetSelect")
+  ];
+  var meal = { type: $("mealType").value, items: items, kcal: 0, p: 0, c: 0, f: 0 };
+  for (var i = 0; i < items.length; i++) {
+    meal.kcal += Number(items[i].kcal);
+    meal.p += Number(items[i].p);
+    meal.c += Number(items[i].c);
+    meal.f += Number(items[i].f);
+  }
+  return meal;
+}
+
+function getVisibleItems(items) {
+  var out = [];
+  for (var i = 0; i < items.length; i++) {
+    var it = items[i];
+    if (Number(it.kcal) > 0 || Number(it.p) > 0 || Number(it.c) > 0 || Number(it.f) > 0) out.push(it);
+  }
+  return out;
+}
+
+function previewMeal() {
+  var meal = getCurrentMeal();
+  $("previewCalories").innerHTML = String(Math.round(meal.kcal));
+  $("previewProtein").innerHTML = meal.p.toFixed(1) + "g";
+  $("previewCarbs").innerHTML = meal.c.toFixed(1) + "g";
+  $("previewFat").innerHTML = meal.f.toFixed(1) + "g";
+
+  var chips = $("currentMealChips");
+  var visible = getVisibleItems(meal.items);
+  if (visible.length === 0) {
+    chips.innerHTML = '<span class="chip">' + TEXT[LANG].noItems + '</span>';
+    return;
+  }
+  var html = "";
+  for (var i = 0; i < visible.length; i++) {
+    html += '<span class="chip">' + getName(visible[i]) + ' · ' + visible[i].amount + '</span>';
+  }
+  chips.innerHTML = html;
+}
+
+function renderDayMeals() {
+  var body = $("dayMealsBody");
+  body.innerHTML = "";
+  var totals = { kcal: 0, p: 0, c: 0, f: 0 };
+
+  for (var i = 0; i < DAY_MEALS.length; i++) {
+    var meal = DAY_MEALS[i];
+    totals.kcal += meal.kcal;
+    totals.p += meal.p;
+    totals.c += meal.c;
+    totals.f += meal.f;
+
+    var namesArr = [];
+    var visible = getVisibleItems(meal.items);
+    for (var j = 0; j < visible.length; j++) namesArr.push(getName(visible[j]));
+    var names = namesArr.length ? namesArr.join(" + ") : TEXT[LANG].partialMeal;
+
+    var tr = document.createElement("tr");
+    tr.innerHTML =
+      "<td>" + translateMealType(meal.type) + "</td>" +
+      "<td>" + names + "</td>" +
+      "<td>" + Math.round(meal.kcal) + "</td>" +
+      "<td>" + meal.p.toFixed(1) + "g</td>" +
+      "<td>" + meal.c.toFixed(1) + "g</td>" +
+      "<td>" + meal.f.toFixed(1) + "g</td>" +
+      '<td><button type="button" class="secondary" onclick="removeMeal(' + i + ')">' + TEXT[LANG].deleteBtn + '</button></td>';
+    body.appendChild(tr);
+  }
+
+  $("dayCalories").innerHTML = String(Math.round(totals.kcal));
+  $("dayProtein").innerHTML = totals.p.toFixed(1) + "g";
+  $("dayCarbs").innerHTML = totals.c.toFixed(1) + "g";
+  $("dayFat").innerHTML = totals.f.toFixed(1) + "g";
+
+  $("barCalories").style.width = Math.min((totals.kcal / TARGETS.kcal) * 100, 100) + "%";
+  $("barProtein").style.width = Math.min((totals.p / TARGETS.protein) * 100, 100) + "%";
+  $("barCarbs").style.width = Math.min((totals.c / TARGETS.carbs) * 100, 100) + "%";
+  $("barFat").style.width = Math.min((totals.f / TARGETS.fat) * 100, 100) + "%";
+}
+
+function addMeal() {
+  try {
+    var meal = getCurrentMeal();
+    DAY_MEALS.push(meal);
+    renderDayMeals();
+    setStatus(TEXT[LANG].added, false);
+  } catch (e) {
+    setStatus("Error adding meal: " + e.message, true);
+  }
+}
+
+function removeMeal(index) {
+  DAY_MEALS.splice(index, 1);
+  renderDayMeals();
+  setStatus(TEXT[LANG].deleted, false);
+}
+
+function resetDay() {
+  DAY_MEALS = [];
+  renderDayMeals();
+  setStatus(TEXT[LANG].dayReset, false);
+}
+
+function resetBuilder() {
+  $("mealType").selectedIndex = 0;
+  $("proteinSelect").selectedIndex = 0;
+  $("carbSelect").selectedIndex = 0;
+  $("fatSelect").selectedIndex = 0;
+  $("vegSelect").selectedIndex = 0;
+  $("sweetSelect").selectedIndex = 0;
+  previewMeal();
+  setStatus(TEXT[LANG].builderReset, false);
+}
+
+function updateStaticText() {
+  document.documentElement.lang = LANG;
+  document.documentElement.dir = LANG === "he" ? "rtl" : "ltr";
+  document.body.style.direction = LANG === "he" ? "rtl" : "ltr";
+
+  $("title").innerHTML = TEXT[LANG].title;
+  $("subtitle").innerHTML = TEXT[LANG].subtitle;
+  $("defaultTargetsText").innerHTML = TEXT[LANG].defaultTargets;
+  $("targetsLine").innerHTML = TARGETS.kcal + " kcal, " + TARGETS.protein + "g " + TEXT[LANG].proteinWord.toLowerCase() + ", " + TARGETS.carbs + "g " + TEXT[LANG].carbs.toLowerCase() + ", " + TARGETS.fat + "g " + TEXT[LANG].fatWord.toLowerCase();
+
+  $("builderTitle").innerHTML = TEXT[LANG].builderTitle;
+  $("mealTypeLabel").innerHTML = TEXT[LANG].mealType;
+  $("proteinLabel").innerHTML = TEXT[LANG].protein;
+  $("carbLabel").innerHTML = TEXT[LANG].carb;
+  $("fatLabel").innerHTML = TEXT[LANG].fat;
+  $("vegLabel").innerHTML = TEXT[LANG].veg;
+  $("sweetLabel").innerHTML = TEXT[LANG].sweet;
+  $("addMealBtn").innerHTML = TEXT[LANG].addMeal;
+  $("resetBuilderBtn").innerHTML = TEXT[LANG].resetBuilder;
+  $("resetDayBtn").innerHTML = TEXT[LANG].resetDay;
+  $("previewTitle").innerHTML = TEXT[LANG].previewTitle;
+  $("dailySummaryTitle").innerHTML = TEXT[LANG].dailySummary;
+
+  $("caloriesSmall1").innerHTML = TEXT[LANG].calories;
+  $("proteinSmall1").innerHTML = TEXT[LANG].proteinWord;
+  $("carbsSmall1").innerHTML = TEXT[LANG].carbs;
+  $("fatSmall1").innerHTML = TEXT[LANG].fatWord;
+  $("caloriesSmall2").innerHTML = TEXT[LANG].calories;
+  $("proteinSmall2").innerHTML = TEXT[LANG].proteinWord;
+  $("carbsSmall2").innerHTML = TEXT[LANG].carbs;
+  $("fatSmall2").innerHTML = TEXT[LANG].fatWord;
+
+  $("mealTh").innerHTML = TEXT[LANG].meal;
+  $("itemsTh").innerHTML = TEXT[LANG].items;
+  $("caloriesTh").innerHTML = TEXT[LANG].calories;
+  $("proteinTh").innerHTML = TEXT[LANG].proteinWord;
+  $("carbsTh").innerHTML = TEXT[LANG].carbs;
+  $("fatTh").innerHTML = TEXT[LANG].fatWord;
+  $("actionTh").innerHTML = TEXT[LANG].action;
+
+  $("proteinLibraryTitle").innerHTML = TEXT[LANG].proteinLibrary;
+  $("carbLibraryTitle").innerHTML = TEXT[LANG].carbLibrary;
+  $("fatLibraryTitle").innerHTML = TEXT[LANG].fatLibrary;
+  $("vegLibraryTitle").innerHTML = TEXT[LANG].vegLibrary;
+  $("sweetLibraryTitle").innerHTML = TEXT[LANG].sweetLibrary;
+
+  $("foodTh1").innerHTML = TEXT[LANG].food; $("portionTh1").innerHTML = TEXT[LANG].portion;
+  $("foodTh2").innerHTML = TEXT[LANG].food; $("portionTh2").innerHTML = TEXT[LANG].portion;
+  $("foodTh3").innerHTML = TEXT[LANG].food; $("portionTh3").innerHTML = TEXT[LANG].portion;
+  $("foodTh4").innerHTML = TEXT[LANG].food; $("portionTh4").innerHTML = TEXT[LANG].portion;
+  $("foodTh5").innerHTML = TEXT[LANG].food; $("portionTh5").innerHTML = TEXT[LANG].portion;
+
+  var mealType = $("mealType").value;
+  $("mealType").innerHTML = "";
+  var mealTypes = [
+    {en:"Breakfast", he:TEXT.he.breakfast},
+    {en:"Lunch", he:TEXT.he.lunch},
+    {en:"Dinner", he:TEXT.he.dinner},
+    {en:"Snack", he:TEXT.he.snack}
+  ];
+  for (var i=0;i<mealTypes.length;i++) {
+    var op = document.createElement("option");
+    op.value = mealTypes[i].en;
+    op.text = LANG === "he" ? mealTypes[i].he : mealTypes[i].en;
+    $("mealType").appendChild(op);
+  }
+  $("mealType").value = mealType;
+
+  buildOptions("proteinSelect","protein");
+  buildOptions("carbSelect","carbs");
+  buildOptions("fatSelect","fats");
+  buildOptions("vegSelect","veg");
+  buildOptions("sweetSelect","sweets");
+
+  var nameCells = document.querySelectorAll("td[data-en]");
+  for (var n=0; n<nameCells.length; n++) {
+    nameCells[n].innerHTML = LANG === "he" ? nameCells[n].getAttribute("data-he") : nameCells[n].getAttribute("data-en");
+  }
+
+  previewMeal();
+  renderDayMeals();
+}
+
+function changeLanguage(lang) {
+  LANG = lang;
+  updateStaticText();
+  setStatus(TEXT[LANG].ready, false);
+}
+
+function initPage() {
+  updateStaticText();
+  setStatus(TEXT[LANG].ready, false);
+}
+</script>
+</body>
+</html>
